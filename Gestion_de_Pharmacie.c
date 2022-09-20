@@ -3,40 +3,121 @@
 #include <string.h>
 #include <time.h>
 
-int numTotal=0;
+int numTotal=0;//numero des produit  total existant
+float max=0; // Max des prix des produits vendus en journée courante
+float ptv=0; //prix des produit total vendue
+float min;
+int nmb=0; //le nombre des produits vendue
+
 //Structures Section
 struct produit{
     char nom[30],code[30];
     int quantite;
     float prix;
-    time_t time[40];
+    char temp[30];
+
 };
+void ajouterProduits(struct produit p[100]);
+void afficherProduits(struct produit p[100]);
+void orderAlpha(struct produit p[100]);
+void orderPrix(struct produit p[100]);
+void triage_du_liste(struct produit p[100]);
+void acheterProduit(struct produit p[100]);
+void Rechercher_les_produits_code(struct produit p[100]);
+void Rechercher_les_produits_quantite(struct produit p[100]);
+void recherche_les_produits(struct produit p[100]);
+void Etat_du_stock(struct produit p[100]);
+void AlimenterStock(struct produit p[100]);
+void SupprimerProduits(struct produit p[100]);
+void StatistiqueVente(struct produit p[100]);
+
+int main()
+{struct produit p[100];
 
 
-//Function ajouter
-void ajouterPreduits(struct produit p[100],int N){
-    int i;
+
+     int N=0,OP;
+    do{
+        printf("\n\t\t       Menu Principal  :\n\n");
+        printf("\t1-Ajouter un ou plusieurs nouveau produit \n");
+        printf("\t2-Afficher Les Produits \n");
+        printf("\t3-Lister tous les produits (Nom, prix, prix TTC)\n");
+        printf("\t4-Acheter produit \n");
+        printf("\t5-Rechercher les produits\n");
+        printf("\t6-Etat du stock \n");
+        printf("\t7-Alimenter le stock  \n");
+        printf("\t8-Supprimer les produits  \n");
+        printf("\t9-Statistique de vente  \n");
+        printf("\t10-Quitter De Programme\n");
+        scanf("%d",&OP);
+system("cls");
+
+        switch(OP){
+            case 1:
+                ajouterProduits(p);
+                break;
+            case 2:
+                afficherProduits(p);
+                break;
+            case 3:
+                triage_du_liste(p);
+                break;
+            case 4:
+                acheterProduit(p);
+                break;
+            case 5:recherche_les_produits(p);
+                break;
+            case 6: Etat_du_stock(p);
+                 break;
+            case 7: AlimenterStock(p);
+                 break;
+            case 8: SupprimerProduits(p);
+                 break;
+            case 9: StatistiqueVente(p);
+                 break;
+            case 10: printf("By by\n");
+                break;
+            default:
+                break;
+        }
+
+    }while(OP !=10);
+
+ return 0;
+}
+//Fonction ajouter nouveau produit
+void ajouterProduits(struct produit p[100]){
+
+    int N;
+    char cod[50];
+
+    printf("Combien de produits souhaitez-vous saisir ?: ");
+    scanf("%d",&N);
+
     for (int i=numTotal; i<numTotal+N; i++){
         printf("\n  Donnez Le Code Produit: ");
         scanf("%s",p[i].code);
         printf("    Donnez Le Nom Produit: ");
         scanf("%s",p[i].nom);
-        printf("    Donnez Le Quantitie Produit: ");
+        printf("    Donnez La Quantitie Produit: ");
         scanf("%d",&p[i].quantite);
         printf("    Donnez Le Prix Produit: ");
         scanf("%f",&p[i].prix);
+        p[i].prix*=p[i].quantite; //somme des prix
         p[i].prix += 0.15 * p[i].prix; // TTC =prix+15%*prix
+        strcpy(p[i].temp,"0");
 
     }
     numTotal+=N;
+    min=p[0].prix;
 }
 //afficherPoduit
 void afficherProduits(struct produit p[100]){
     //afficher
-    printf("\nProduit\t\tCode\t\tNom\tQuantitie\tPrix\tla_date_achat\n");
-     printf("--------------------------------------------------------------------------------");
+    printf("\nProduit\t\tCode\t\tNom\tQuantitie\tPrix\t\t       la_date_achat\n");
+     printf("--------------------------------------------------------------------------------------------------------------");
     for(int j=0; j<numTotal; j++){
-        printf("\n%d\t\t%s\t\t%s\t%d\t\t%.2f DH \t %s\n",j+1,p[j].code,p[j].nom,p[j].quantite,p[j].prix,p[j].time);
+        printf("\n%d\t\t%s\t\t%s\t%d\t\t%.2f DH \t\t%s \n",j+1,p[j].code,p[j].nom,p[j].quantite,p[j].prix,p[j].temp);
 }}
 //Fonction l'ordre alphabetique croissant du nom(triage par selection ou pivot).
 void orderAlpha(struct produit p[100]){
@@ -100,16 +181,23 @@ void acheterProduit(struct produit p[100]){
                                 p[i].prix-=k;
                                 p[i].quantite-=N;
                                 time(&currenttime);
-                                strcpy(p[i].time,ctime(&currenttime));
-           printf("\n          %s",p[i].time);
+                                strcpy(p[i].temp,ctime(&currenttime));
+
+           printf("\n          %s",ctime(&currenttime));
            printf("\ncode: %s  nom: %s   quantite: %d   prix: %.2f DH \n",p[i].code,p[i].nom,p[i].quantite,p[i].prix);
-            break;
+          L=0;
+          ptv+=k;
+          nmb+=N;
+          if(max<k) max=k;
+          if(min>k) min=k;
+          break;
+
       }
        else L=1;
-       break;
+
     }
     else L =2;
-    break;
+
     }
         if (L==1)
         printf("La Quantite n'est pas suffisante");
@@ -117,82 +205,109 @@ void acheterProduit(struct produit p[100]){
         printf("Le code N'existe pas dans la liste des produit");
 }
 //fonction de recherhe du produit par code
-//void Rechercher_les_produits_code(struct produit p[100],int nemtotal,double cod)
-//{
-//    printf("\n  Produit |	Code	|   Nom	        |   Quantitie	        |  Prix	\n");
-//     printf("\n-------------------------------------------------------------------------");
-//    for(int j=0;j<nemtotal;j++)
-//    {
-//        if (cod==p[j].code){
-//            printf("\n  %d  ",j+1);printf("     |");printf(" %d  ",p[j].code);
-//        printf("         %s    ",p[j].nom);printf("             %d" ,p[j].quantite);
-//        printf("  %.2f DH ",p[j].prix);printf("\n");
-//            break;}
-//    }}
-//
-//    //fonction de Rechercher_les_produits_par quantite
-//    void Rechercher_les_produits_quantite(struct produit p[100],int nemtotal,double Q){
-//    for(int i=0;i<nemtotal;i++)
-//    printf("\n  Produit |	Code	|   Nom	        |   Quantitie	|  Prix	\n");
-//     printf("\n-------------------------------------------------------------------------");
-//    for(int j=0;j<nemtotal;j++)
-//    {
-//        if (Q==p[j].quantite){
-//            printf("\n  %d  ",j+1);printf("     |");printf(" %d  ",p[j].code);
-//        printf("         %s    ",p[j].nom);printf("        %d   " ,p[j].quantite);
-//        printf("            %.2f DH    ",p[j].prix);printf("\n");
-//            break;}
-//    }}
-//
-//void Etat_du_stock(struct produit p[100],int nemtotal){
-//
-//    printf("\n  Produit |	Code	|   Nom	        |   Quantitie	|  Prix	\n");
-//     printf("\n-------------------------------------------------------------------------");
-//    for(int j=0;j<nemtotal;j++)
-//    {
-//        if (p[j].quantite<3){
-//            printf("\n  %d  ",j+1);printf("     |");printf(" %d  ",p[j].code);
-//        printf("              %s    ",p[j].nom);printf("                     %d   " ,p[j].quantite);
-//        printf("          %.2f DH    ",p[j].prix);printf("\n");
-//}}}
+void Rechercher_les_produits_code(struct produit p[100])
+{
+char cod[50];
+        printf("donner le code de produit :");
+        scanf("%s",cod);
+    for(int i=0;i<numTotal;i++)
+    {
+        if (strcmp(cod,p[i].code)==0)
+           printf("\ncode: %s  nom: %s   quantite: %d   prix: %.2f DH \n",p[i].code,p[i].nom,p[i].quantite,p[i].prix);
 
-int main()
-{struct produit p[100];
-     int N=0,OP;
-    do{
-        printf("\n\t   Menu:\n\n");
-        printf("    1-Ajouter Un Produit\n");
-        printf("    2-Modifier Un Produit\n");
-        printf("    3-Supprimer Un Produit\n");
-        printf("    4-Afficher Les Produits\n");
-        printf("    5-Lister tous les produits (Nom, prix, prix TTC):\n");
-        printf("    6-le produit Achete : \n");
-        printf("    10-Quitter De Programme\n");
-        scanf("%d",&OP);
+    }}
 
+    //fonction de Rechercher_les_produits_par quantite
+    void Rechercher_les_produits_quantite(struct produit p[100]){
+    int quan;
+    printf("\n\tdonner la quantite : ");
+    scanf("%d",&quan);
 
-        switch(OP){
-            case 1:
-                printf("Combien de produits souhaitez-vous saisir ?: ");
-                scanf("%d",&N);
-                ajouterPreduits(p,N);
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                afficherProduits(p);
-                break;
-            case 5:triage_du_liste(p);
-                break;
-            case 6: acheterProduit(p);
-                 break;
-            case 10: printf("By by\n");
-                break;
-        }
+    for(int i=0;i<numTotal;i++)
+    {
+        if (quan==p[i].quantite)
+           printf("\ncode: %s  nom: %s   quantite: %d   prix: %.2f DH \n",p[i].code,p[i].nom,p[i].quantite,p[i].prix);
 
-    }while(OP != 10);
+    }}
+    // fonction de recherche
+    void recherche_les_produits(struct produit p[100]){int n;
+        printf("\n  1-Rechercher les produits Par : Code");
+        printf("\n  2-Rechercher les produits Par : Quantité.\n");
+        scanf("%d",&n);
+        system("cls");
+    switch(n)
+{   case 1:
+        Rechercher_les_produits_code(p);
+        break;
+    case 2: Rechercher_les_produits_quantite(p);
+        break ;
+    default:
+        break;
+}}
 
- return 0;
+void Etat_du_stock(struct produit p[100]){
+    printf("\n\tEtat du stock: permet d’afficher les produits dont la quantité est inférieure à 3.\n");
+
+    for(int i=0;i<numTotal;i++)
+    {
+        if (p[i].quantite<3)
+            printf("\ncode: %s  nom: %s   quantite: %d   prix: %.2f DH \n",p[i].code,p[i].nom,p[i].quantite,p[i].prix);
+}}
+void AlimenterStock(struct produit p[100]){
+    char cod[30];
+    int N,L;
+    float k;
+    printf("Donnez Le Code Produit: ");
+        scanf("%s",cod);
+            for(int i=0; i<numTotal; i++){
+
+                    if(strcmp(cod,p[i].code)==0){       //if cod=p[i].code So strcmp return value zero
+                            printf("\nDonnez le nombre de ce produit qui alimenter le stock: ");
+                             scanf("%d",&N);
+                                k=(p[i].prix*N)/(p[i].quantite);
+                                p[i].prix+=k;
+                                p[i].quantite+=N;
+            L=0;
+            break;
+    }
+    else L =1;
+
+    }
+        if (L==1)
+        printf("Le code N'existe pas dans la liste des produit");
+
+}
+void SupprimerProduits(struct produit p[100])
+{
+    char cod[30];
+    int L;
+
+    printf("Donnez Le Code Produit: ");
+        scanf("%s",cod);
+            for(int i=0; i<numTotal; i++){
+
+                    if(strcmp(cod,p[i].code)==0){       //if cod=p[i].code So strcmp return value zero
+                        for(int j=i;j<numTotal;j++)
+                            {p[j].prix=p[j+1].prix;
+                            p[j].quantite=p[j+1].quantite;
+                            strcpy(p[j].code,p[j+1].code);
+                            strcpy(p[j].nom,p[j+1].nom);
+                            strcpy(p[j].temp,p[j+1].temp);
+                            }
+            L=0;
+            break;
+    }
+    else L =1;
+
+    }
+    numTotal--;
+        if (L==1)
+        printf("Le code N'existe pas dans la liste des produit");
+}
+void StatistiqueVente(struct produit p[100])
+{
+    printf("\nle total des prix des produits vendus en journée courante:\t%f DH",ptv);
+    printf("\nla moyenne des prix des produits vendus en journée courante:\t%f DH",ptv/nmb);
+    printf("\nle Max des prix des produits vendus en journée courante:\t%f DH",max);
+    printf("\nAfficher le Min des prix des produits vendus en journée courante:\t%f DH",min);
 }
